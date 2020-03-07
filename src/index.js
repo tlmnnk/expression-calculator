@@ -5,83 +5,51 @@ function eval() {
 
 function expressionCalculator(expr) {
 
-    let result = null;
-
-    let bracketResult;
-    let arrResult;
-
-    let strBracket;
-
-    function getLastBrackets(arr) {
-        //кладем строку в массив
-        const strArr = arr.trim().split(' ');
-        //последний индекс левой скобки
-        let lastLeftIndexBracket = strArr.lastIndexOf('(');
-        //обрезаем массив начиная с послед левой скобки
-        let arrInBracketsLeft = strArr.slice(lastLeftIndexBracket);
-        //обрезаем массив начиная с послед левой скобки
-        let nearRightIndexBracket = lastLeftIndexBracket.indexOf(')');
-        let arrInBracketsRight = arrInBracketsLeft.slice(nearRightIndexBracket);
-
-        if (arrInBracketsLeft.lastIndexOf('(') === -1) {
-            bracketResult = strArr[lastLeftIndexBracket + 1] + strArr[lastLeftIndexBracket + 3];
-            //нужно записать результат выражения скобок и подставить его
-            //в строку/массив изначальный, потом повторить пока не останется скобок
-            // в массиве/строке только числа и мат операторы
-            
-            strBracket
-        } else {
-            getLastBrackets(arrInBracketsLeft);
-        }
+    function calculator(first, mathOperator, second) {
+        const calcObj = {
+            '+': (first, second) => first + second,
+            '-': (first, second) => first - second,
+            '*': (first, second) => first * second,
+            '/': (first, second) => first / second
+        };
+    
+        return calcObj[mathOperator](first, second);
     }
-    
-    
 
+        //кладем строку в массив
+        const strArr = expr.trim().split(' ');
 
-
-    strArr.forEach(element => {
-        if(element.length > 1) {
-            throw new Error('Brackets must be paired!');
-        }
-    });
-
-
-
-    strArr.forEach((item, i, arr) => {
-        if(/[+*-/]/.test(item)) {
-            switch (item) {
-                case '+':
-                    result += arr[i - 1] + arr[i -1];
-                    break;
-                case '-':
-                    result += arr[i - 1] - arr[i -1];
-                    break;
-                case '*':
-                    result += arr[i - 1] * arr[i -1];
-                    break;
-                case '/':
-                    result += arr[i - 1] / arr[i -1];
-                    break;
-                default:
-                    break;
+        let leftBracketCounter = 0,
+            rightBracketCounter = 0;
+        //проверяем если в массиве есть непарные скобки 
+        strArr.forEach(element => {
+            if (element === '(') leftBracketCounter++;
+            if (element === ')') rightBracketCounter++;
+            });
+            // сравниеваем количество скобок
+        if (leftBracketCounter !== rightBracketCounter) throw new Error('ExpressionError: Brackets must be paired');
+        if (strArr.includes('/ 0')) { throw new TypeError('TypeError: Division by zero.'); }
+        
+        for(let i = 0; i < strArr.length; i++) {
+            if(strArr[i] === '*' || strArr[i] === '/') {
+                let result = calculator(+strArr[i - 1], strArr[i], +strArr[i+ 1]);
+                strArr.splice(i - 1, 3, result);
+                i = 0;
             }
         }
-    });
 
-    function recursiveBracketCheck(bool, myArr) {
-        if (myArr.indexOf('(') === -1) {
-            bool = true;
-        } else {
-            let bracketIndexFirst = strArr.indexOf('(');
-            let bracketIndexLast = strArr.lastIndexOf(')');
-            let arr  = myArr.slice(bracketIndexFirst + 1, bracketIndexLast - 1);
+        for(let i = 0; i < strArr.length; i++) {
+            if(strArr[i] === '+' || strArr[i] === '-') {
+                let result = calculator(+strArr[i - 1], strArr[i], +strArr[i+ 1]);
+                strArr.splice(i - 1, 3, result);
+                i = 0;
+            }
         }
-    }
 
-  
-    return result;
-    
+    return strArr[0];
+
 }
+    
 
 module.exports = {
     expressionCalculator
