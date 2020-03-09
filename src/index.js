@@ -28,7 +28,7 @@ function expressionCalculator(expr) {
             });
             // сравниеваем количество скобок
         if (leftBracketCounter !== rightBracketCounter) throw new Error('ExpressionError: Brackets must be paired');
-        if (strArr.includes('/ 0')) { throw new TypeError('TypeError: Division by zero.'); }
+        if (expr.includes('/ 0')) { throw new TypeError('TypeError: Division by zero.'); }
         
         for(let i = 0; i < strArr.length; i++) {
             if(strArr[i] === '*' || strArr[i] === '/') {
