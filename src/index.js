@@ -17,7 +17,7 @@ function expressionCalculator(expr) {
     }
 
         //кладем строку в массив
-        const strArr = expr.trim().split(' ');
+        let strArr = expr.trim().split('');
 
         let leftBracketCounter = 0,
             rightBracketCounter = 0;
@@ -30,6 +30,11 @@ function expressionCalculator(expr) {
         if (leftBracketCounter !== rightBracketCounter) throw new Error('ExpressionError: Brackets must be paired');
         if (expr.includes('/ 0')) { throw new TypeError('TypeError: Division by zero.'); }
         
+    
+        
+
+    function bracketCalcFunc(strArr) {
+        strArr = expr.trim().split(' ');
         for(let i = 0; i < strArr.length; i++) {
             if(strArr[i] === '*' || strArr[i] === '/') {
                 let result = calculator(+strArr[i - 1], strArr[i], +strArr[i+ 1]);
@@ -47,10 +52,23 @@ function expressionCalculator(expr) {
         }
 
     return strArr[0];
+    }
+
+    const operatorsReg = /[-+*/]/g;
+    const bracketReg = /\([^()]*\)/;
+    strArr = strArr.join('');
+    strArr = strArr.replace(operatorsReg, ' $& ');
+
+    while(strArr.includes('(')) {
+        strArr = strArr.replace(bracketReg, bracketCalcFunc);
+    }
+
+    strArr = bracketCalcFunc(strArr);
+
+    return +strArr;  
 
 }
     
-
 module.exports = {
     expressionCalculator
 }
