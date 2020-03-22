@@ -1,73 +1,132 @@
 function eval() {
+
     // Do not use eval!!!
     return;
 }
 
 function expressionCalculator(expr) {
+    const oper = [")", "(", "+", "-", "*", "/"];
 
-    function calculator(first, mathOperator, second) {
-        const calcObj = {
-            '+': (first, second) => first + second,
-            '-': (first, second) => first - second,
-            '*': (first, second) => first * second,
-            '/': (first, second) => first / second
-        };
-    
-        return calcObj[mathOperator](first, second);
-    }
+    if (checkBrackets(expr) === false) throw new Error("ExpressionError: Brackets must be paired");
 
-        //кладем строку в массив
-        let strArr = expr.trim().split('');
+    if (expr.split("").includes(" ") === false) expr = addSpace(expr);
 
-        let leftBracketCounter = 0,
-            rightBracketCounter = 0;
-        //проверяем если в массиве есть непарные скобки 
-        strArr.forEach(element => {
-            if (element === '(') leftBracketCounter++;
-            if (element === ')') rightBracketCounter++;
-            });
-            // сравниеваем количество скобок
-        if (leftBracketCounter !== rightBracketCounter) throw new Error('ExpressionError: Brackets must be paired');
-        if (expr.includes('/ 0')) { throw new TypeError('TypeError: Division by zero.'); }
-        
-    
-        
+    let arr = deleteSpace(expr.split(" "));
 
-    function bracketCalcFunc(strArr) {
-        strArr = expr.trim().split(' ');
-        for(let i = 0; i < strArr.length; i++) {
-            if(strArr[i] === '*' || strArr[i] === '/') {
-                let result = calculator(+strArr[i - 1], strArr[i], +strArr[i+ 1]);
-                strArr.splice(i - 1, 3, result);
-                i = 0;
+    let expArr = transformArr(arr);
+
+    function transformArr(expArr) {
+        let stack = [];
+        let transformArr = [];
+
+        for (let i = 0; i < expArr.length; i++) {
+
+            if (oper.includes(expArr[i]) === false) transformArr.push(expArr[i]);
+
+            else if (expArr[i] == "(") stack.push(expArr[i]);
+
+            else if (expArr[i] == ")") {
+                while (true) {
+                    let pop = "";
+
+                    if (stack.length > 0) pop = stack.pop();
+                    else throw new Error("ExpressionError: Brackets must be paired");
+
+                    if (pop !== "(") transformArr.push(pop);
+                    else break;
+                }
+
+
+            } else if (oper.includes(expArr[i])) {
+
+                while (true) {
+
+                    if (checkIndexOf(expArr[i], stack[stack.length - 1])) {
+                        transformArr.push(stack.pop());
+                    } else {
+                        stack.push(expArr[i]);
+                        break;
+                    }
+                }
+
             }
         }
 
-        for(let i = 0; i < strArr.length; i++) {
-            if(strArr[i] === '+' || strArr[i] === '-') {
-                let result = calculator(+strArr[i - 1], strArr[i], +strArr[i+ 1]);
-                strArr.splice(i - 1, 3, result);
-                i = 0;
-            }
+        while (stack.length > 0) {
+            transformArr.push(stack.pop());
         }
 
-    return strArr[0];
+        return transformArr;
     }
 
-    const operatorsReg = /[-+*/]/g;
-    const bracketReg = /\([^()]*\)/;
-    strArr = strArr.join('');
-    strArr = strArr.replace(operatorsReg, ' $& ');
+    function calculating(expArr) {
+        let result = [];
 
-    while(strArr.includes('(')) {
-        strArr = strArr.replace(bracketReg, bracketCalcFunc);
+        for (let i = 0; i < expArr.length; i++) {
+
+
+            if (oper.includes(expArr[i]) === false) result.push(expArr[i]);
+
+
+            if (oper.includes(expArr[i])) {
+                let b = result.pop();
+                let a = result.pop();
+
+                if (expArr[i] === "+") result.push(Number(a) + Number(b));
+
+                if (expArr[i] === "-") result.push(Number(a) - Number(b));
+
+                if (expArr[i] === "*") result.push(Number(a) * Number(b));
+
+                if (expArr[i] === "/") {
+                    if (Number(b) === 0) throw new Error("TypeError: Division by zero.");
+                    else result.push(Number(a) / Number(b));
+                }
+            }
+
+        }
+        return result[0];
     }
 
-    strArr = bracketCalcFunc(strArr);
+    return calculating(expArr);
 
-    return +strArr;  
+
+    function checkBrackets(exp) {
+        let open = 0;
+        let close = 0;
+
+        for (let key in exp) {
+
+            if (exp.includes("(")) {
+                open++;
+                exp = exp.replace("(", "");
+            }
+            if (exp.includes(")")) {
+                close++;
+                exp = exp.replace(")", "");
+            }
+
+            if (open !== close) throw new Error("ExpressionError: Brackets must be paired");
+        }
+
+    }
+
+    function addSpace(expr) {
+        return expr = expr.split("").join(" ")
+    }
+
+    function deleteSpace(expr) {
+        return expr.filter((item) => item !== '');
+    }
+
+    function checkIndexOf(el, lastEl) {
+        return (oper.indexOf(lastEl) > 1 && oper.indexOf(el) > 1 &&
+            oper.indexOf(el) < 4) || (oper.indexOf(lastEl) > 3 && oper.indexOf(el) > 3)
+    }
 
 }
+
+
     
 module.exports = {
     expressionCalculator
